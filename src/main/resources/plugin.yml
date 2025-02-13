@@ -1,0 +1,10 @@
+name: RaidEvents
+version: '${project.version}'
+main: ru.kforbro.raidevents.RaidEvents
+api-version: '1.16'
+commands:
+  event: {}
+depend:
+  - WorldGuard
+  - DecentHolograms
+  - ZNPCsPlus
