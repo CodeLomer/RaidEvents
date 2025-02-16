@@ -27,6 +27,7 @@ public class GoldRush extends Event {
         this.stopAt = this.spawnAt + 1200000L;
         RaidEvents.getInstance().getEventManager().setCurrentGoldRush(this);
         Bukkit.dispatchCommand(Bukkit.getConsoleSender(), "raidcastle goldrush start");
+        RaidEvents.getInstance().getEventManager().setCurrentGoldRush(this);
 
         new BukkitRunnable() {
             @Override

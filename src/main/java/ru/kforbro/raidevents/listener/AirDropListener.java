@@ -3,7 +3,6 @@ package ru.kforbro.raidevents.listener;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.block.Block;
-import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -48,7 +47,7 @@ public class AirDropListener implements Listener {
         if (player.getGameMode().equals(GameMode.SPECTATOR)) {
             player.openInventory(airDrop.getInventory());
         } else {
-            airDrop.getGui().open((HumanEntity) player);
+            airDrop.getGui().open(player);
         }
     }
 

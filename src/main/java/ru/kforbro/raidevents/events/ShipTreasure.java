@@ -4,7 +4,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import eu.decentsoftware.holograms.api.DHAPI;
 import eu.decentsoftware.holograms.api.holograms.Hologram;
-import eu.decentsoftware.holograms.api.utils.items.ItemBuilder;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -18,12 +17,17 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import ru.kforbro.raidevents.RaidEvents;
+import ru.kforbro.raidevents.gui.builder.item.ItemBuilder;
+import ru.kforbro.raidevents.gui.guis.Gui;
 import ru.kforbro.raidevents.utils.Colorize;
 import ru.kforbro.raidevents.utils.HologramUtils;
 import ru.kforbro.raidevents.utils.Time;
 import ru.kforbro.raidevents.utils.Utils;
+import net.kyori.adventure.text.Component;
 
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 
@@ -56,7 +60,7 @@ public class ShipTreasure {
         this.location = location;
         this.ship = ship;
         this.hologramName = "shiptreasure_" + this.serializeLocation(location);
-        this.gui = ((SimpleBuilder)((SimpleBuilder)((SimpleBuilder)Gui.gui().title(Component.text(Colorize.format("&8Сокровища пиратов")))).rows(6)).disableAllInteractions()).create();
+        this.gui = Gui.gui().title(Component.text(Colorize.format("&8Сокровища пиратов"))).rows(6).disableAllInteractions().create();
         this.ship.getMythicLootContent().populateContainer(this.chestContent, 54);
     }
 
@@ -84,23 +88,28 @@ public class ShipTreasure {
                         for (int i = 0; i < gui.getRows() * 9; ++i) {
                             if (!gui.getGuiItems().containsKey(i)) emptySlots.add(i);
                         }
-                        int randomSlot = emptySlots.get(ThreadLocalRandom.current().nextInt(emptySlots.size()));
-                        gui.updateItem(randomSlot, ItemBuilder.from(randomMaterials.get(ThreadLocalRandom.current().nextInt(randomMaterials.size())))
-                                .setName(Colorize.format("&x&f&8&9&d&5&7Секретный предмет"))
-                                .asGuiItem(event -> {
-                                    Player player = (Player) event.getWhoClicked();
-                                    if (clickItemCooldown.getIfPresent(player.getUniqueId()) != null) return;
-                                    clickItemCooldown.put(player.getUniqueId(), true);
-                                    randomMaterials.forEach(m -> player.setCooldown(m, 3));
-                                    gui.removeItem(randomSlot);
-                                    Utils.giveOrDrop(player, itemStack);
-                                }));
+                        if (!emptySlots.isEmpty()) {
+                            int randomSlot = emptySlots.get(ThreadLocalRandom.current().nextInt(emptySlots.size()));
+                            gui.updateItem(randomSlot, ItemBuilder.from(
+                                    randomMaterials.get(ThreadLocalRandom.current().nextInt(randomMaterials.size()))
+                                    )
+                                    .setName(Colorize.format("&x&f&8&9&d&5&7Секретный предмет"))
+                                            .asGuiItem(event -> {
+                                                Player player = (Player) event.getWhoClicked();
+                                                if (clickItemCooldown.getIfPresent(player.getUniqueId()) != null) return;
+                                                clickItemCooldown.put(player.getUniqueId(), true);
+                                                randomMaterials.forEach(m -> player.setCooldown(m, 3));
+                                                gui.removeItem(randomSlot);
+                                                Utils.giveOrDrop(player, itemStack);
+                                            }));
+                        }
                     }
                     chestContent.remove(randomKey);
                 }
             }.runTaskTimer(RaidEvents.getInstance(), 0L, 2L);
         }
     }
+
 
     public void setCurrentKeys(int keys) {
         this.currentKeys = keys;

@@ -14,24 +14,14 @@ import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.world.block.BlockState;
 import com.sk89q.worldguard.WorldGuard;
-import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
-import java.io.File;
-import java.io.FileInputStream;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-
 import lombok.Getter;
 import lombok.Setter;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.Sound;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -39,10 +29,12 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import ru.kforbro.raidevents.RaidEvents;
 import ru.kforbro.raidevents.config.MineSettings;
-import ru.kforbro.raidevents.utils.Colorize;
-import ru.kforbro.raidevents.utils.Cuboid;
-import ru.kforbro.raidevents.utils.RandomLocation;
-import ru.kforbro.raidevents.utils.Time;
+import ru.kforbro.raidevents.utils.*;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 @Getter
 public class Mine extends Event {
@@ -54,7 +46,7 @@ public class Mine extends Event {
     private long stopAt;
     @Setter
     private EditSession editSession;
-    private HashMap<Location, ItemStack> blocks = new HashMap<>();
+    private final HashMap<Location, ItemStack> blocks = new HashMap<>();
     @Setter
     private Cuboid cuboid;
     @Setter
@@ -64,23 +56,30 @@ public class Mine extends Event {
 
     public Mine(MineSettings.MineData mineData) {
         this.mineData = mineData;
-        this.setName("&x&F&F&4&1&6&0\u0421ме\u0440\u0442\u0435\u043b\u044c\u043d\u0430\u044f \u0448\u0430\u0445\u0442\u0430");
+        this.setName("&x&F&F&4&1&6&0Смертельная шахта");
         this.setRarity(this.mineData.name());
     }
 
     @Override
     public void start() {
         CompletableFuture.runAsync(() -> {
-            try {
                 World world = Bukkit.getWorld("world");
+                if(world == null){
+                    throw new RuntimeException("not found default world: world");
+                }
+                Clipboard clipboard = this.getClipboard();
+                if(clipboard == null){
+                    return;
+                }
                 this.spawnAt = System.currentTimeMillis();
                 this.stopAt = this.spawnAt + 1500000L;
                 RandomLocation.SafeLocation safeLocation = RandomLocation.getRandomSafeLocation(world, RandomLocation.Algorithm.SQUARE, 500.0, world.getWorldBorder().getSize() / 2.0 - 50.0, 0, 0);
                 if (safeLocation == null) {
+                    MyLogger.logError(this, "Failed to find safe location for mine");
                     return;
                 }
+                RaidEvents.getInstance().getEventManager().setCurrentMine(this);
                 this.location = safeLocation.location().add(0.0, 1.0, 0.0);
-                Clipboard clipboard = this.getClipboard();
                 this.pasteClipboard(this.location, clipboard);
                 this.setBlocks();
                 this.createRegion(clipboard);
@@ -107,15 +106,12 @@ public class Mine extends Event {
                 }.runTaskTimerAsynchronously(RaidEvents.getInstance(), 0L, 7L);
                 Bukkit.getOnlinePlayers().forEach(player -> {
                     Colorize.sendMessage(player, "&f");
-                    Colorize.sendMessage(player, "&9 &n┃&r " + this.getName() + " &f\u043f\u043e\u044f\u0432\u0438\u043b\u0430\u0441\u044c \u043d\u0430 \u043a\u0430\u0440\u0442\u0435.");
-                    Colorize.sendMessage(player, "&9 ┃&f \u041c\u0435\u0441т\u043e\u043dа\u0445\u043e\u0436\u0434\u0435\u043d\u0438\u0435: &x&f&e&c&2&2&3" + this.location.getBlockX() + ", " + this.location.getBlockY() + ", " + this.location.getBlockZ());
+                    Colorize.sendMessage(player, "&9 &n┃&r " + this.getName() + " &fпо̂явился на карте.");
+                    Colorize.sendMessage(player, "&9 ┃&f Местонахождение: &x&f&e&c&2&2&3" + this.location.getBlockX() + ", " + this.location.getBlockY() + ", " + this.location.getBlockZ());
                     Colorize.sendMessage(player, "&f");
                     player.playSound(player.getLocation(), Sound.ENTITY_WITHER_AMBIENT, 1.0f, 1.0f);
                 });
                 RaidEvents.getInstance().getEventManager().setCurrentMine(this);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
         });
     }
 
@@ -124,8 +120,8 @@ public class Mine extends Event {
             return;
         }
         Colorize.sendMessage(player, "&f");
-        Colorize.sendMessage(player, "&9 &n\u2503&r " + this.name + " &f\u0430\u043a\u0442\u0438\u0432\u043d\u0430 \u0443\u0436\u0435 &x&f&e&c&2&2&3" + Time.prettyTime((System.currentTimeMillis() - this.spawnAt) / 1000L));
-        Colorize.sendMessage(player, "&9 \u2503&f \u041a\u043e\u043e\u0440\u0434\u0438\u043d\u0430\u0442\u044b: &x&f&e&c&2&2&3" + this.location.getBlockX() + ", " + this.location.getBlockY() + ", " + this.location.getBlockZ());
+        Colorize.sendMessage(player, "&9 &n┃&r " + this.name + " &fактивна уже &x&f&e&c&2&2&3" + Time.prettyTime((System.currentTimeMillis() - this.spawnAt) / 1000L));
+        Colorize.sendMessage(player, "&9 ┃&f Координаты: &x&f&e&c&2&2&3" + this.location.getBlockX() + ", " + this.location.getBlockY() + ", " + this.location.getBlockZ());
         Colorize.sendMessage(player, "&f");
     }
 
@@ -154,57 +150,67 @@ public class Mine extends Event {
         Wanderer.undoSession(this.location, this.editSession);
         this.removeRegion("raidevents_" + this.uuid);
         this.removeRegion("raidevents_mineable_" + this.uuid);
+        RaidEvents.getInstance().getEventManager().setCurrentMine(null);
     }
 
     public void createRegion(Clipboard clipboard) {
         int additionalRadius = 15;
         RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
         RegionManager regions = container.get(BukkitAdapter.adapt(this.location.getWorld()));
+        if(regions == null){
+            throw new RuntimeException("filed load regions for event "+this.name);
+        }
         Location cornerFirst = this.location.clone().add(Mine.getSchematicOffset(clipboard));
         Location cornerSecond = cornerFirst.clone().add(new Vector(clipboard.getRegion().getWidth() - 1, clipboard.getRegion().getHeight(), clipboard.getRegion().getLength() - 1));
         Location lowestCorner = new Location(cornerFirst.getWorld(), Math.min(cornerFirst.getX(), cornerSecond.getX()), Math.min(cornerFirst.getY(), cornerSecond.getY()), Math.min(cornerFirst.getZ(), cornerSecond.getZ())).subtract(additionalRadius, 0.0, additionalRadius);
         Location highestCorner = new Location(cornerFirst.getWorld(), Math.max(cornerFirst.getX(), cornerSecond.getX()), Math.max(cornerFirst.getY(), cornerSecond.getY()), Math.max(cornerFirst.getZ(), cornerSecond.getZ())).add(additionalRadius, 0.0, additionalRadius);
-        BlockVector3 min = BlockVector3.at(lowestCorner.getX(), (double)this.location.getWorld().getMinHeight(), lowestCorner.getZ());
+        BlockVector3 min = BlockVector3.at(lowestCorner.getX(), 0, lowestCorner.getZ());
         BlockVector3 max = BlockVector3.at(highestCorner.getX(), this.location.getWorld().getMaxHeight(), highestCorner.getZ());
         ProtectedCuboidRegion protectedRegion = new ProtectedCuboidRegion("raidevents_" + this.uuid, true, min, max);
-        protectedRegion.setFlag((Flag)Flags.PVP, (Object)StateFlag.State.ALLOW);
-        protectedRegion.setFlag((Flag)Flags.POTION_SPLASH, (Object)StateFlag.State.ALLOW);
-        protectedRegion.setFlag((Flag)Flags.MOB_DAMAGE, (Object)StateFlag.State.ALLOW);
-        protectedRegion.setFlag((Flag)Flags.DAMAGE_ANIMALS, (Object)StateFlag.State.ALLOW);
-        protectedRegion.setFlag((Flag)Flags.DESTROY_VEHICLE, (Object)StateFlag.State.ALLOW);
-        protectedRegion.setFlag((Flag)Flags.TNT, (Object)StateFlag.State.DENY);
-        protectedRegion.setFlag((Flag)Flags.OTHER_EXPLOSION, (Object)StateFlag.State.DENY);
-        protectedRegion.setFlag((Flag)Flags.FIRE_SPREAD, (Object)StateFlag.State.DENY);
-        protectedRegion.setFlag((Flag)Flags.CHEST_ACCESS, (Object)StateFlag.State.ALLOW);
-        protectedRegion.setFlag((Flag)Flags.LIGHTER, (Object)StateFlag.State.DENY);
-        protectedRegion.setFlag((Flag)Flags.BLOCKED_CMDS, (Object)Set.of("/gsit", "/sit", "/lay", "/crawl", (Object)"/bellyflop"));
+        protectedRegion.setFlag(Flags.PVP, StateFlag.State.ALLOW);
+        protectedRegion.setFlag(Flags.POTION_SPLASH, StateFlag.State.ALLOW);
+        setFlagRegions(protectedRegion);
+        protectedRegion.setFlag(Flags.FIRE_SPREAD, StateFlag.State.DENY);
+        protectedRegion.setFlag(Flags.CHEST_ACCESS, StateFlag.State.ALLOW);
+        protectedRegion.setFlag(Flags.LIGHTER, StateFlag.State.DENY);
+        protectedRegion.setFlag(Flags.BLOCKED_CMDS, Set.of("/gsit", "/sit", "/lay", "/crawl", "/bellyflop"));
         regions.addRegion(protectedRegion);
     }
 
     public void createRegionMineable() {
         RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
         RegionManager regions = container.get(BukkitAdapter.adapt(this.location.getWorld()));
+        if(regions == null){
+            throw new RuntimeException("filed load regions for event "+this.name);
+        }
         BlockVector3 min = BlockVector3.at(this.cuboid.getXMin(), this.cuboid.getYMin(), this.cuboid.getZMin());
         BlockVector3 max = BlockVector3.at(this.cuboid.getXMax(), this.cuboid.getYMax(), this.cuboid.getZMax());
         ProtectedCuboidRegion protectedRegion = new ProtectedCuboidRegion("raidevents_mineable_" + this.uuid, true, min, max);
-        protectedRegion.setFlag(Flags.PVP, (Object)StateFlag.State.ALLOW);
-        protectedRegion.setFlag(Flags.MOB_DAMAGE, (Object)StateFlag.State.ALLOW);
-        protectedRegion.setFlag(Flags.DAMAGE_ANIMALS, (Object)StateFlag.State.ALLOW);
-        protectedRegion.setFlag(Flags.DESTROY_VEHICLE, (Object)StateFlag.State.ALLOW);
-        protectedRegion.setFlag(Flags.TNT, (Object)StateFlag.State.DENY);
-        protectedRegion.setFlag(Flags.OTHER_EXPLOSION, (Object)StateFlag.State.DENY);
-        protectedRegion.setFlag((Flag)Flags.FIRE_SPREAD, (Object)StateFlag.State.DENY);
-        protectedRegion.setFlag((Flag)Flags.CHEST_ACCESS, (Object)StateFlag.State.ALLOW);
-        protectedRegion.setFlag((Flag)Flags.LIGHTNING, (Object)StateFlag.State.ALLOW);
-        protectedRegion.setFlag((Flag)Flags.BLOCK_BREAK, (Object)StateFlag.State.ALLOW);
+        protectedRegion.setFlag(Flags.PVP, StateFlag.State.ALLOW);
+        setFlagRegions(protectedRegion);
+        protectedRegion.setFlag(Flags.FIRE_SPREAD, StateFlag.State.DENY);
+        protectedRegion.setFlag(Flags.CHEST_ACCESS, StateFlag.State.ALLOW);
+        protectedRegion.setFlag(Flags.LIGHTNING, StateFlag.State.ALLOW);
+        protectedRegion.setFlag(Flags.BLOCK_BREAK, StateFlag.State.ALLOW);
         protectedRegion.setPriority(1);
         regions.addRegion(protectedRegion);
         this.stanCuboid = new Cuboid(new Location(this.cuboid.getWorld(), this.cuboid.getXMin() - 7, this.cuboid.getYMin() - 7, this.cuboid.getZMin() - 7), new Location(this.cuboid.getWorld(), this.cuboid.getXMax() + 7, this.cuboid.getYMax() + 15, this.cuboid.getZMax() + 7));
     }
 
+    static void setFlagRegions(ProtectedCuboidRegion protectedRegion) {
+        protectedRegion.setFlag(Flags.MOB_DAMAGE, StateFlag.State.ALLOW);
+        protectedRegion.setFlag(Flags.DAMAGE_ANIMALS, StateFlag.State.ALLOW);
+        protectedRegion.setFlag(Flags.DESTROY_VEHICLE, StateFlag.State.ALLOW);
+        protectedRegion.setFlag(Flags.TNT, StateFlag.State.DENY);
+        protectedRegion.setFlag(Flags.OTHER_EXPLOSION, StateFlag.State.DENY);
+    }
+
     public void removeRegion(String name) {
         RegionContainer container = WorldGuard.getInstance().getPlatform().getRegionContainer();
         RegionManager regions = container.get(BukkitAdapter.adapt(this.location.getWorld()));
+        if(regions == null){
+            return;
+        }
         regions.removeRegion(name);
     }
 
@@ -214,8 +220,15 @@ public class Mine extends Event {
 
     public Clipboard getClipboard() {
         Clipboard clipboard;
-        File file = new File("plugins/FastAsyncWorldEdit/schematics/raidevents_mine.schem");
+        File file = new File("plugins/worldEdit/schematics/raidevents_mine.schem");
+        if(!file.exists() || !file.getName().endsWith(".schem")){
+            MyLogger.logError(this,"не удалось найти файл cхематики для данного ивента -> raidevents_mine_schem");
+            return null;
+        }
         ClipboardFormat format = ClipboardFormats.findByFile(file);
+        if(format == null){
+            throw new RuntimeException("filed load clipboard for event "+this.name);
+        }
         try (ClipboardReader reader = format.getReader(new FileInputStream(file))){
             clipboard = reader.read();
         } catch (Exception e) {
@@ -226,7 +239,7 @@ public class Mine extends Event {
 
     public void pasteClipboard(Location location, Clipboard clipboard) {
         Location adjustedLocation = location.clone().add(Mine.getSchematicOffset(clipboard));
-        ArrayList<Location> commandBlocks = new ArrayList<Location>();
+        ArrayList<Location> commandBlocks = new ArrayList<>();
         for (int x = 0; x < clipboard.getDimensions().getX(); ++x) {
             for (int y = 0; y < clipboard.getDimensions().getY(); ++y) {
                 for (int z = 0; z < clipboard.getDimensions().getZ(); ++z) {
@@ -304,7 +317,7 @@ public class Mine extends Event {
         }
         MineSettings.MineData this$mineData = this.getMineData();
         MineSettings.MineData other$mineData = other.getMineData();
-        return !(!Objects.equals(this$mineData, other$mineData));
+        return Objects.equals(this$mineData, other$mineData);
     }
 
     protected boolean canEqual(Object other) {
@@ -313,12 +326,11 @@ public class Mine extends Event {
 
     @Override
     public int hashCode() {
-        int PRIME = 59;
         int result = super.hashCode();
         long $spawnAt = this.getSpawnAt();
-        result = result * 59 + (int)($spawnAt >>> 32 ^ $spawnAt);
+        result = result * 59 + Long.hashCode($spawnAt);
         long $stopAt = this.getStopAt();
-        result = result * 59 + (int)($stopAt >>> 32 ^ $stopAt);
+        result = result * 59 + Long.hashCode($stopAt);
         Location $location = this.getLocation();
         result = result * 59 + ($location == null ? 43 : $location.hashCode());
         EditSession $editSession = this.getEditSession();
@@ -332,10 +344,6 @@ public class Mine extends Event {
         MineSettings.MineData $mineData = this.getMineData();
         result = result * 59 + ($mineData == null ? 43 : $mineData.hashCode());
         return result;
-    }
-
-    public void setBlocks(HashMap<Location, ItemStack> blocks) {
-        this.blocks = blocks;
     }
 
     @Override

@@ -14,7 +14,6 @@ import com.sk89q.worldedit.math.BlockVector3;
 import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.world.block.BlockState;
 import com.sk89q.worldguard.WorldGuard;
-import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.flags.Flags;
 import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.managers.RegionManager;
@@ -48,6 +47,7 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import ru.kforbro.raidevents.RaidEvents;
 import ru.kforbro.raidevents.config.Loot;
+import ru.kforbro.raidevents.gui.guis.Gui;
 import ru.kforbro.raidevents.utils.*;
 
 import java.io.File;
@@ -130,9 +130,14 @@ public class Ship extends Event {
             this.stopAt = System.currentTimeMillis() + ThreadLocalRandom.current().nextInt(10, 16) * 60L * 1000L;
             Clipboard clipboard = this.getClipboard();
             if (clipboard == null) {
-                throw new RuntimeException("filed load clipboard for event " + this.name);
+                return;
             }
+            assert world != null;
             RandomLocation.SafeLocation safeLocation = Ship.getRandomSafeLocation(world, RandomLocation.Algorithm.SQUARE, 500.0, world.getWorldBorder().getSize() / 2.0 - 50.0, 0, 0, clipboard);
+            if(safeLocation == null){
+                throw new RuntimeException("filed find safe location for event " + this.name);
+            }
+            RaidEvents.getInstance().getEventManager().setCurrentShip(this);
             this.location = safeLocation.location().add(0.0, 1.0, 0.0);
             this.pasteClipboard(this.location, clipboard);
             this.createRegion(clipboard);
@@ -277,9 +282,10 @@ public class Ship extends Event {
                 }
             }, 20L);
         }
-        this.gui.getGuiItems().forEach((integer, guiItem) -> this.gui.removeItem((int) integer));
+        this.gui.getGuiItems().forEach((integer, guiItem) -> this.gui.removeItem(integer));
         this.playersInGui.forEach(HumanEntity::closeInventory);
         this.removeRegion();
+        RaidEvents.getInstance().getEventManager().setCurrentShip(null);
     }
 
     public void createRegion(Clipboard clipboard) {
@@ -310,10 +316,10 @@ public class Ship extends Event {
 
     private void applyRegionFlags(ProtectedCuboidRegion region) {
         // Флаги с разрешениями
-        Map<Flag, StateFlag.State> allowFlags = Map.of(Flags.PVP, StateFlag.State.ALLOW, Flags.POTION_SPLASH, StateFlag.State.ALLOW, Flags.MOB_DAMAGE, StateFlag.State.ALLOW, Flags.DAMAGE_ANIMALS, StateFlag.State.ALLOW, Flags.DESTROY_VEHICLE, StateFlag.State.ALLOW, Flags.CHEST_ACCESS, StateFlag.State.ALLOW);
+        Map<StateFlag, StateFlag.State> allowFlags = Map.of(Flags.PVP, StateFlag.State.ALLOW, Flags.POTION_SPLASH, StateFlag.State.ALLOW, Flags.MOB_DAMAGE, StateFlag.State.ALLOW, Flags.DAMAGE_ANIMALS, StateFlag.State.ALLOW, Flags.DESTROY_VEHICLE, StateFlag.State.ALLOW, Flags.CHEST_ACCESS, StateFlag.State.ALLOW);
 
         // Флаги с запретами
-        Map<Flag, StateFlag.State> denyFlags = Map.of(Flags.TNT, StateFlag.State.DENY, Flags.OTHER_EXPLOSION, StateFlag.State.DENY, Flags.FIRE_SPREAD, StateFlag.State.DENY, Flags.LIGHTER, StateFlag.State.DENY, Flags.ICE_FORM, StateFlag.State.DENY, Flags.SNOW_FALL, StateFlag.State.DENY);
+        Map<StateFlag, StateFlag.State> denyFlags = Map.of(Flags.TNT, StateFlag.State.DENY, Flags.OTHER_EXPLOSION, StateFlag.State.DENY, Flags.FIRE_SPREAD, StateFlag.State.DENY, Flags.LIGHTER, StateFlag.State.DENY, Flags.ICE_FORM, StateFlag.State.DENY, Flags.SNOW_FALL, StateFlag.State.DENY);
 
         // Установка разрешающих флагов
         allowFlags.forEach(region::setFlag);
@@ -340,7 +346,11 @@ public class Ship extends Event {
 
     public Clipboard getClipboard() {
         Clipboard clipboard;
-        File file = new File("plugins/FastAsyncWorldEdit/schematics/" + this.schematic + ".schem");
+        File file = new File("plugins/worldEdit/schematics/" + this.schematic + ".schem");
+        if(!file.exists() || !file.getName().endsWith(".schem")){
+            MyLogger.logError(this,"не удалось найти файл cхематики для данного ивента -> "+schematic+".schem");
+            return null;
+        }
         ClipboardFormat format = ClipboardFormats.findByFile(file);
         if (format == null) {
             throw new RuntimeException("filed load clipboard for event " + this.name);
@@ -417,6 +427,7 @@ public class Ship extends Event {
         int tries = 0;
         while (true) {
             RandomLocation.ChunkLocationSnapshot cl = RandomLocation.getRandomLocation(w, a, startRadius, endRadius, originX, originY);
+            if(cl == null) continue;
             loc = cl.location();
             if (++tries < 75) {
                 loc.setY(62.0);

@@ -23,15 +23,6 @@ import com.sk89q.worldguard.protection.flags.StateFlag;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.RegionContainer;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.util.*;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
-
-import eu.decentsoftware.holograms.api.utils.items.ItemBuilder;
 import lol.pyr.znpcsplus.api.NpcApiProvider;
 import lol.pyr.znpcsplus.api.entity.EntityPropertyRegistry;
 import lol.pyr.znpcsplus.api.npc.Npc;
@@ -46,14 +37,7 @@ import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.md_5.bungee.api.ChatColor;
-import org.bukkit.Bukkit;
-import org.bukkit.Color;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.NamespacedKey;
-import org.bukkit.Particle;
-import org.bukkit.Sound;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.block.Barrel;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
@@ -69,10 +53,16 @@ import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
 import ru.kforbro.raidevents.RaidEvents;
 import ru.kforbro.raidevents.config.Loot;
-import ru.kforbro.raidevents.utils.Colorize;
-import ru.kforbro.raidevents.utils.RandomLocation;
-import ru.kforbro.raidevents.utils.Time;
-import ru.kforbro.raidevents.utils.Utils;
+import ru.kforbro.raidevents.gui.builder.item.ItemBuilder;
+import ru.kforbro.raidevents.gui.guis.Gui;
+import ru.kforbro.raidevents.utils.*;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeUnit;
 
 
 @Getter
@@ -210,23 +200,34 @@ public class Wanderer extends Event {
         block.setType(Material.BARREL, false);
         BlockData blockData = block.getBlockData();
         if (blockData instanceof Barrel) {
-            barrel = (Barrel)blockData;
+            barrel = (Barrel) blockData;
             barrel.getBlock().setBlockData(Bukkit.createBlockData("minecraft:barrel[facing=up]"));
             barrel.update();
         }
         this.lootContent.populateContainer(this.chestContent, 54);
-        this.gui = ((SimpleBuilder)((SimpleBuilder)((SimpleBuilder)Gui.gui().title(Component.text(Colorize.format("&8" + ChatColor.stripColor(Colorize.format(this.name)))))).rows(6)).disableAllInteractions()).create();
-        this.gui.setOpenGuiAction(event -> this.playersInGui.add((Player)event.getPlayer()));
-        this.gui.setCloseGuiAction(event -> this.playersInGui.remove((Player)event.getPlayer()));
+        this.gui = (((Gui.gui()
+                .title(Component.text(Colorize.format("&8" + ChatColor.stripColor(Colorize.format(this.name))))))
+                .rows(6))
+                .disableAllInteractions())
+                .create();
+        this.gui.setOpenGuiAction(event -> this.playersInGui.add((Player) event.getPlayer()));
+        this.gui.setCloseGuiAction(event -> this.playersInGui.remove((Player) event.getPlayer()));
+
         blockData = (BlockData) block.getState();
-        if (blockData instanceof Barrel) {
-            barrel = (org.bukkit.block.Barrel)blockData;
+        if (blockData instanceof org.bukkit.block.Barrel) {
+            barrel = (org.bukkit.block.Barrel) blockData;
             barrel.open();
         }
-        final List<Material> randomMaterials = List.of(Material.CLAY_BALL, Material.NAUTILUS_SHELL, Material.BONE_MEAL, Material.GRAY_DYE, Material.FIREWORK_STAR, Material.GUNPOWDER, Material.PHANTOM_MEMBRANE, Material.QUARTZ);
-        final Cache<UUID, Boolean> clickItemCooldown = CacheBuilder.newBuilder().expireAfterWrite(150L, TimeUnit.MILLISECONDS).build();
-        new BukkitRunnable(){
 
+        final List<Material> randomMaterials = List.of(
+                Material.CLAY_BALL, Material.NAUTILUS_SHELL, Material.BONE_MEAL,
+                Material.GRAY_DYE, Material.FIREWORK_STAR, Material.GUNPOWDER,
+                Material.PHANTOM_MEMBRANE, Material.QUARTZ);
+        final Cache<UUID, Boolean> clickItemCooldown = CacheBuilder.newBuilder()
+                .expireAfterWrite(150L, TimeUnit.MILLISECONDS)
+                .build();
+
+        new BukkitRunnable() {
             public void run() {
                 if (Wanderer.this.chestContent.isEmpty()) {
                     this.cancel();
@@ -235,30 +236,38 @@ public class Wanderer extends Event {
                 ArrayList<Integer> keysAsArray = new ArrayList<>(Wanderer.this.chestContent.keySet());
                 int randomKey = keysAsArray.get(ThreadLocalRandom.current().nextInt(keysAsArray.size()));
                 ItemStack itemStack = Wanderer.this.chestContent.getOrDefault(randomKey, null);
+
                 if (itemStack != null) {
                     ArrayList<Integer> emptySlots = new ArrayList<>();
                     for (int i = 0; i < Wanderer.this.gui.getRows() * 9; ++i) {
                         if (Wanderer.this.gui.getGuiItems().containsKey(i)) continue;
                         emptySlots.add(i);
                     }
-                    int randomSlot = emptySlots.get(ThreadLocalRandom.current().nextInt(emptySlots.size()));
-                    Wanderer.this.gui.updateItem(randomSlot, ((ItemBuilder)ItemBuilder.from((Material)randomMaterials.get(ThreadLocalRandom.current().nextInt(randomMaterials.size())))
-                            .setName(Colorize.format("&x&f&8&9&d&5&7Секретный предмет"))).asGuiItem(event -> {
-                        Player player = (Player)event.getWhoClicked();
-                        if (clickItemCooldown.getIfPresent(player.getUniqueId()) != null) {
-                            return;
-                        }
-                        clickItemCooldown.put(player.getUniqueId(), true);
-                        randomMaterials.forEach(m -> player.setCooldown(m, 3));
-                        Wanderer.this.gui.removeItem(randomSlot);
-                        Utils.giveOrDrop(player, itemStack);
-                    }));
-                }
-                Wanderer.this.chestContent.remove(randomKey);
-            }
 
+                    if (!emptySlots.isEmpty()) {
+                        int randomSlot = emptySlots.get(ThreadLocalRandom.current().nextInt(emptySlots.size()));
+
+                        Wanderer.this.gui.setItem(randomSlot, ItemBuilder.from(
+                                        randomMaterials.get(ThreadLocalRandom.current().nextInt(randomMaterials.size())))
+                                .setName(Colorize.format("&x&f&8&9&d&5&7Секретный предмет"))
+                                .asGuiItem(event -> {
+                                    Player player = (Player) event.getWhoClicked();
+                                    if (clickItemCooldown.getIfPresent(player.getUniqueId()) != null) {
+                                        return;
+                                    }
+                                    clickItemCooldown.put(player.getUniqueId(), true);
+                                    randomMaterials.forEach(m -> player.setCooldown(m, 3));
+                                    Wanderer.this.gui.removeItem(randomSlot);
+                                    Utils.giveOrDrop(player, itemStack);
+                                }));
+                    }
+
+                    Wanderer.this.chestContent.remove(randomKey);
+                }
+            }
         }.runTaskTimer(RaidEvents.getInstance(), 0L, 2L);
     }
+
 
     public Location getLocationForNpc() {
         return this.npcLocations.get(ThreadLocalRandom.current().nextInt(this.npcLocations.size()));
@@ -270,6 +279,7 @@ public class Wanderer extends Event {
         undoSession(this.location, this.editSession);
         this.removeRegion();
         Bukkit.getOnlinePlayers().forEach(player -> Wanderer.removeItems(player.getInventory()));
+        RaidEvents.getInstance().getEventManager().setCurrentShip(null);
     }
 
     static void undoSession(Location location, EditSession editSession2) {
@@ -359,18 +369,16 @@ public class Wanderer extends Event {
     }
 
     public Clipboard getClipboard() {
-        Clipboard clipboard;
         File file = new File("plugins/FastAsyncWorldEdit/schematics/raidevents_wanderer.schem");
         ClipboardFormat format = ClipboardFormats.findByFile(file);
         if(format == null){
             throw new RuntimeException("filed load clipboard for event "+this.name);
         }
         try (ClipboardReader reader = format.getReader(new FileInputStream(file))){
-            clipboard = reader.read();
+            return reader.read();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return clipboard;
     }
 
     public void pasteClipboard(Location location, Clipboard clipboard) {
@@ -522,10 +530,15 @@ public class Wanderer extends Event {
                 RandomLocation.getRandomSafeLocation(world, RandomLocation.Algorithm.SQUARE, 500.0,
                         world.getWorldBorder().getSize() / 2.0 - 50.0, 0, 0);
         if (safeLocation == null) {
+            MyLogger.logError(this, "Failed to find safe location for wanderer");
             return;
         }
+        RaidEvents.getInstance().getEventManager().setCurrentWanderer(this);
         this.location = safeLocation.location().add(0.0, 1.0, 0.0);
         Clipboard clipboard = this.getClipboard();
+        if(clipboard == null){
+            throw new RuntimeException("Failed to load clipboard for event "+this.name);
+        }
         this.pasteClipboard(this.location, clipboard);
         this.createRegion(clipboard);
         this.itemStack = this.generateItemStack();

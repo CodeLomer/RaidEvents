@@ -2,19 +2,22 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+    <modelVersion>4.0.0</modelVersion>
 
-  <groupId>ru.kforbro</groupId>
-  <artifactId>RaidEvents</artifactId>
-  <version>1.0-SNAPSHOT</version>
-  <packaging>jar</packaging>
+    <groupId>ru.kforbro</groupId>
+    <artifactId>RaidEvents</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <packaging>jar</packaging>
 
-  <name>RaidEvents</name>
+    <name>RaidEvents</name>
 
-  <properties>
-    <java.version>16</java.version>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+
+    <properties>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <java.version>17</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
 
     <build>
         <plugins>
@@ -32,14 +35,6 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.2.4</version>
-                <configuration>
-                    <relocations>
-                        <relocation>
-                            <pattern>dev.triumphteam.gui</pattern>
-                            <shadedPattern>ru.kforbro.raidevents.gui</shadedPattern> <!-- Replace package here here -->
-                        </relocation>
-                    </relocations>
-                </configuration>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -59,97 +54,111 @@
         </resources>
     </build>
 
-  <repositories>
-      <repository>
-          <id>papermc-repo</id>
-          <url>https://repo.papermc.io/repository/maven-public/</url>
-      </repository>
-      <repository>
-          <id>sonatype</id>
-          <url>https://oss.sonatype.org/content/groups/public/</url>
-      </repository>
-      <repository>
-          <id>pyr-snapshots</id>
-          <name>Pyr's Repo</name>
-          <url>https://repo.pyr.lol/snapshots</url>
-      </repository>
-      <repository>
-          <id>jitpack.io</id>
-          <url>https://jitpack.io</url>
-      </repository>
-      <repository>
-          <id>sk89q-repo</id>
-          <url>https://maven.enginehub.org/repo/</url>
-      </repository>
-      <repository>
-          <id>minecraft-repo</id>
-          <url>https://libraries.minecraft.net/</url>
-      </repository>
-      <repository>
-          <id>codemc-repo</id>
-          <url>https://repo.codemc.io/repository/maven-public/</url>
-          <layout>default</layout>
-      </repository>
-  </repositories>
+    <repositories>
+        <repository>
+            <id>papermc-repo</id>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
+        <repository>
+            <id>sonatype</id>
+            <url>https://oss.sonatype.org/content/groups/public/</url>
+        </repository>
+        <repository>
+            <id>pyr-snapshots</id>
+            <name>Pyr's Repo</name>
+            <url>https://repo.pyr.lol/snapshots</url>
+        </repository>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+        <repository>
+            <id>sk89q-repo</id>
+            <url>https://maven.enginehub.org/repo/</url>
+        </repository>
+        <repository>
+            <id>minecraft-repo</id>
+            <url>https://libraries.minecraft.net/</url>
+        </repository>
+        <repository>
+            <id>codemc-repo</id>
+            <url>https://repo.codemc.io/repository/maven-public/</url>
+            <layout>default</layout>
+        </repository>
+    </repositories>
 
-  <dependencies>
-      <dependency>
-          <groupId>com.destroystokyo.paper</groupId>
-          <artifactId>paper-api</artifactId>
-          <version>1.16.1-R0.1-SNAPSHOT</version>
-          <scope>provided</scope>
-      </dependency>
-      <dependency>
-          <groupId>lol.pyr</groupId>
-          <artifactId>znpcsplus-api</artifactId>
-          <version>2.0.0-SNAPSHOT</version>
-          <scope>provided</scope>
-      </dependency>
-      <dependency>
-          <groupId>com.github.decentsoftware-eu</groupId>
-          <artifactId>decentholograms</artifactId>
-          <version>2.8.12</version>
-      </dependency>
-      <dependency>
-          <groupId>com.sk89q.worldguard</groupId>
-          <artifactId>worldguard-bukkit</artifactId>
-          <version>7.0.5</version>
-          <scope>provided</scope>
-      </dependency>
-      <dependency>
-          <groupId>com.mojang</groupId>
-          <artifactId>authlib</artifactId>
-          <version>1.5.21</version>
-          <scope>provided</scope>
-      </dependency>
-      <dependency>
-          <groupId>org.projectlombok</groupId>
-          <artifactId>lombok</artifactId>
-          <version>1.18.36</version>
-          <scope>provided</scope>
-      </dependency>
-      <dependency>
-          <groupId>com.github.Exlll.ConfigLib</groupId>
-          <artifactId>configlib-yaml</artifactId>
-          <version>v4.5.0</version>
-      </dependency>
-      <dependency>
-          <groupId>org.jetbrains</groupId>
-          <artifactId>annotations</artifactId>
-          <version>24.1.0</version>
-          <scope>compile</scope>
-      </dependency>
-      <dependency>
-          <groupId>dev.triumphteam</groupId>
-          <artifactId>triumph-gui</artifactId>
-          <version>3.1.11</version>
-          <scope>runtime</scope>
-      </dependency>
-      <dependency>
-          <groupId>de.tr7zw</groupId>
-          <artifactId>item-nbt-api-plugin</artifactId>
-          <version>2.14.1</version>
-          <scope>provided</scope>
-      </dependency>
-  </dependencies>
+    <dependencies>
+        <dependency>
+            <groupId>com.destroystokyo.paper</groupId>
+            <artifactId>paper-api</artifactId>
+            <version>1.16.1-R0.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>lol.pyr</groupId>
+            <artifactId>znpcsplus-api</artifactId>
+            <version>2.0.0-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.decentsoftware-eu</groupId>
+            <artifactId>decentholograms</artifactId>
+            <version>2.8.12</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sk89q.worldguard</groupId>
+            <artifactId>worldguard-bukkit</artifactId>
+            <version>7.0.5</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.mojang</groupId>
+            <artifactId>authlib</artifactId>
+            <version>1.5.21</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.36</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.Exlll.ConfigLib</groupId>
+            <artifactId>configlib-yaml</artifactId>
+            <version>V4.5.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>24.1.0</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>de.tr7zw</groupId>
+            <artifactId>item-nbt-api-plugin</artifactId>
+            <version>2.14.1</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-api</artifactId>
+            <version>4.18.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-text-serializer-gson</artifactId>
+            <version>4.14.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-text-serializer-legacy</artifactId>
+            <version>4.14.0</version>
+        </dependency>
+        <dependency>
+            <groupId>net.kyori</groupId>
+            <artifactId>adventure-text-minimessage</artifactId>
+            <version>4.18.0</version>
+        </dependency>
+    </dependencies>
 </project>

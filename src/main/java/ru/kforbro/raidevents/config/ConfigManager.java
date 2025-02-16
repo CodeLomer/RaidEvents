@@ -3,8 +3,12 @@ package ru.kforbro.raidevents.config;
 import de.exlll.configlib.YamlConfigurationProperties;
 import de.exlll.configlib.YamlConfigurations;
 import lombok.Getter;
+import org.bukkit.Color;
 import org.bukkit.Location;
+import org.bukkit.inventory.ItemStack;
 import ru.kforbro.raidevents.RaidEvents;
+import ru.kforbro.raidevents.converter.ColorConverter;
+import ru.kforbro.raidevents.converter.LootContextConverter;
 
 import java.io.File;
 
@@ -59,9 +63,10 @@ public class ConfigManager {
         return YamlConfigurationProperties
                 .newBuilder()
                 .addSerializer(Location.class, new Storage.LocationStringSerializer())
+                .addSerializer(ItemStack.class, new Storage.ItemStackSerializer())
+                .addSerializer(Loot.LootContent.class, new LootContextConverter())
+                .addSerializer(Color.class, new ColorConverter())
                 .build();
     }
-
-
-
 }
+

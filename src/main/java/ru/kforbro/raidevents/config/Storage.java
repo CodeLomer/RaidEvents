@@ -7,6 +7,8 @@ import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.inventory.ItemStack;
+import ru.kforbro.raidevents.utils.Serialization;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +49,18 @@ public class Storage {
             String[] split = s.split(";");
             World world = Bukkit.getWorld(split[0]);
             return new Location(world, Integer.parseInt(split[1]), Integer.parseInt(split[2]), Integer.parseInt(split[3]));
+        }
+    }
+
+    static final class ItemStackSerializer implements Serializer<ItemStack, String> {
+        @Override
+        public String serialize(ItemStack itemStack) {
+            return Serialization.itemStackToString(itemStack);
+        }
+
+        @Override
+        public ItemStack deserialize(String s) {
+            return Serialization.stringToItemStack(s);
         }
     }
 }

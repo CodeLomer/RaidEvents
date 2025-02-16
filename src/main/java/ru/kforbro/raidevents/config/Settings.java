@@ -11,7 +11,7 @@ import java.util.Objects;
 @Getter
 @Configuration
 public class Settings {
-    private Map<String, Integer> events = Map.of((Object)"airdrop", (Object)25, (Object)"mine", (Object)25, (Object)"wanderer", (Object)25, (Object)"goldrush", (Object)25);
+    private Map<String, Integer> events = Map.of("airdrop", 25, "mine", 25, "wanderer", 25, "goldrush",25);
 
     public boolean equals(Object o) {
         if (o == this) {

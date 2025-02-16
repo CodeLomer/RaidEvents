@@ -1,16 +1,16 @@
 package ru.kforbro.raidevents.config;
 
 import de.exlll.configlib.Configuration;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Objects;
-
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Color;
 import org.bukkit.Material;
 import ru.kforbro.raidevents.utils.WeighedProbability;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
 
 @Setter
 @Getter
@@ -37,19 +37,14 @@ public class AirDropSettings {
         if (o == this) {
             return true;
         }
-        if (!(o instanceof AirDropSettings other)) {
+        AirDropSettings other;
+        if (!(o instanceof AirDropSettings)) {
             return false;
         }
-        if (!other.canEqual(this)) {
-            return false;
-        }
+        other = (AirDropSettings) o;
         List<AirDropData> this$airDrops = this.getAirDrops();
         List<AirDropData> other$airDrops = other.getAirDrops();
         return Objects.equals(this$airDrops, other$airDrops);
-    }
-
-    protected boolean canEqual(Object other) {
-        return other instanceof AirDropSettings;
     }
 
     @Override
@@ -65,7 +60,10 @@ public class AirDropSettings {
     public String toString() {
         return "AirDropSettings(airDrops=" + this.getAirDrops() + ")";
     }
+    
+        public record AirDropData(String name, int chestCount, String lootContent, Color color, Material material,
+                                  boolean explode, boolean allowPvP, double weight) {
 
-    public record AirDropData(String name, int chestCount, String lootContent, Color color, Material material, boolean explode, boolean allowPvP, double weight) {
-    }
+        // Getters and setters if needed
+        }
 }

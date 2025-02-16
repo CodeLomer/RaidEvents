@@ -8,7 +8,6 @@ import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
-import org.bukkit.block.Barrel;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
@@ -35,21 +34,22 @@ public class ShipBarrel {
         this.location = location;
         this.ship = ship;
         this.hologramName = "shiptreasure_" + this.serializeLocation(location);
-        BlockData blockData = this.location.getBlock().getBlockData();
+        /*BlockData blockData = this.location.getBlock().getBlockData();
         if (blockData instanceof Barrel barrel) {
-            this.blockFace = barrel.getFacing();
-        }
+            this.blockFace = barrel.getBlock().getFace(b);
+        }*/
     }
 
     public void spawn() {
         Block block = this.location.getBlock();
         block.setType(Material.BARREL);
         BlockData blockData = block.getBlockData();
-        if (blockData instanceof Barrel barrel) {
-            barrel.setFacing(BlockFace.UP);
-            block.setBlockData((BlockData)barrel);
-        }
+        /*if (blockData instanceof Barrel barrel) {
+            barrel.setFacing(BlockFace.UP);  // Эта строка должна работать, если API поддерживает такое
+            block.setBlockData(barrel);  // Устанавливаем обновленные данные блока
+        }*/
     }
+
 
     public void despawn() {
         this.location.getBlock().setType(Material.AIR);

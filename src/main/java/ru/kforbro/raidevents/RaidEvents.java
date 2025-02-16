@@ -9,7 +9,7 @@ import ru.kforbro.raidevents.events.EventManager;
 import ru.kforbro.raidevents.listener.*;
 
 import java.util.Objects;
-import java.util.logging.Logger;
+
 
 @Getter
 public final class RaidEvents extends JavaPlugin {
@@ -19,6 +19,7 @@ public final class RaidEvents extends JavaPlugin {
     private EventManager eventManager;
     private boolean disabling = false;
 
+    @Override
     public void onEnable() {
         instance = this;
         this.configManager = new ConfigManager(this);
@@ -31,8 +32,10 @@ public final class RaidEvents extends JavaPlugin {
         this.getServer().getPluginManager().registerEvents(new ShipListener(this), this);
     }
 
+    @Override
     public void onDisable() {
         this.disabling = true;
+        if(eventManager == null) return;
         this.eventManager.getCurrentAirDrops().values().forEach(AirDrop::stop);
         if (this.eventManager.getCurrentWanderer() != null) {
             this.eventManager.getCurrentWanderer().stop();
@@ -46,10 +49,6 @@ public final class RaidEvents extends JavaPlugin {
         if (this.eventManager.getCurrentShip() != null) {
             this.eventManager.getCurrentShip().stop();
         }
-    }
-
-    public static Logger logger() {
-        return instance.getLogger();
     }
 
 }

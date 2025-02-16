@@ -11,6 +11,8 @@ import org.bukkit.inventory.ItemStack;
 import ru.kforbro.raidevents.RaidEvents;
 import ru.kforbro.raidevents.utils.WeighedProbability;
 
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -25,7 +27,9 @@ public class Loot {
             ))
     );
 
-    public static class LootContent {
+    public static class LootContent implements Serializable {
+        @Serial
+        private static final long serialVersionUID = 45040504003020L;
         private final int minAmount;
         private final int maxAmount;
         private final List<LootEntry> items;
@@ -89,42 +93,28 @@ public class Loot {
         }
     }
 
-    public static class LootEntry {
-        private final double weight;
-        private final Material material;
-        private final List<Material> materials;
-        private final int minAmount;
-        private final int maxAmount;
-        private final String customItem;
-        private final List<String> customItems;
-
-        public LootEntry(double weight, Material material, List<Material> materials, int minAmount, int maxAmount, String customItem, List<String> customItems) {
-            this.weight = weight;
-            this.material = material;
-            this.materials = materials;
-            this.minAmount = minAmount;
-            this.maxAmount = maxAmount;
-            this.customItem = customItem;
-            this.customItems = customItems;
-        }
+        public record LootEntry(double weight, Material material, List<Material> materials, int minAmount, int maxAmount,
+                                String customItem, List<String> customItems) implements Serializable {
+        @Serial
+        private static final long serialVersionUID = 45040504003020L;
 
         public ItemStack getItemStack() {
-            ItemStack itemStack = null;
-            if (material != null) {
-                itemStack = new ItemStack(material);
-            } else if (materials != null && !materials.isEmpty()) {
-                itemStack = new ItemStack(materials.get(ThreadLocalRandom.current().nextInt(materials.size())));
-            } else if (customItem != null) {
-                itemStack = RaidEvents.getInstance().getConfigManager().getCustomItem().getItems().get(customItem);
-            } else if (customItems != null && !customItems.isEmpty()) {
-                itemStack = RaidEvents.getInstance().getConfigManager().getCustomItem().getItems().get(customItems.get(ThreadLocalRandom.current().nextInt(customItems.size())));
+                ItemStack itemStack = null;
+                if (material != null) {
+                    itemStack = new ItemStack(material);
+                } else if (materials != null && !materials.isEmpty()) {
+                    itemStack = new ItemStack(materials.get(ThreadLocalRandom.current().nextInt(materials.size())));
+                } else if (customItem != null) {
+                    itemStack = RaidEvents.getInstance().getConfigManager().getCustomItem().getItems().get(customItem);
+                } else if (customItems != null && !customItems.isEmpty()) {
+                    itemStack = RaidEvents.getInstance().getConfigManager().getCustomItem().getItems().get(customItems.get(ThreadLocalRandom.current().nextInt(customItems.size())));
+                }
+                if (itemStack != null) {
+                    itemStack.setAmount(ThreadLocalRandom.current().nextInt(minAmount, maxAmount + 1));
+                }
+                return itemStack;
             }
-            if (itemStack != null) {
-                itemStack.setAmount(ThreadLocalRandom.current().nextInt(minAmount, maxAmount + 1));
-            }
-            return itemStack;
         }
-    }
 
     @FunctionalInterface
     interface ItemSetter {

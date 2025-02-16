@@ -21,33 +21,30 @@ public class EventCommand implements CommandExecutor {
 
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (args.length == 0) {
-            boolean anyEvent = announceCurrentEvents((Player) sender);
-            if (!anyEvent) {
-                showNextEvent(sender);
-            }
+            showNextEvent(sender);
             return true;
         } else if (!sender.hasPermission("raidevents.admin")) {
-            return true;
+             return true;
         }
-
+        if(args.length < 2 && !args[0].equalsIgnoreCase("help")) return true;
         switch (args[0].toLowerCase()) {
             case "help":
                 showHelp(sender);
                 break;
             case "airdrop":
-                if ("spawn".equalsIgnoreCase(args[1])) startAirDrop();
+                if ("spawn".equalsIgnoreCase(args[1]))  eventManager.startAirDrop(true);
                 break;
             case "wanderer":
-                if ("spawn".equalsIgnoreCase(args[1])) startWanderer();
+                if ("spawn".equalsIgnoreCase(args[1])) eventManager.startWanderer(true);
                 break;
             case "mine":
-                if ("spawn".equalsIgnoreCase(args[1])) startMine();
+                if ("spawn".equalsIgnoreCase(args[1])) eventManager.startMine(true);
                 break;
             case "goldrush":
-                if ("spawn".equalsIgnoreCase(args[1])) startGoldRush();
+                if ("spawn".equalsIgnoreCase(args[1])) eventManager.startGoldRush(true);
                 break;
             case "ship":
-                if ("spawn".equalsIgnoreCase(args[1])) startShip();
+                if ("spawn".equalsIgnoreCase(args[1])) eventManager.startShip(true);
                 break;
             case "customitem":
                 handleCustomItem(args, sender);
@@ -96,14 +93,16 @@ public class EventCommand implements CommandExecutor {
 
     private void showNextEvent(CommandSender sender) {
         Event nextEvent = this.eventManager.getNextEvent();
-        long secondsToNext = this.eventManager.millisToNextEvent() / 1000L;
-        String time = Time.prettyTime(secondsToNext);
+        if(nextEvent != null){
+            long secondsToNext = this.eventManager.millisToNextEvent() / 1000L;
+            String time = Time.prettyTime(secondsToNext);
+            String message = sender.hasPermission("raidevents.show_events") ?
+                    "&8 | &f" +nextEvent.getName() + " &fпоявится через &x&f&e&c&2&2&3" + time :
+                    "&8 | &f Следующий ивент появится через &x&f&e&c&2&2&3" + time;
+            Colorize.sendMessage(sender, message);
 
-        String message = sender.hasPermission("raidevents.show_events") ?
-                "&8 | &f " + nextEvent.getName() + " &fпоявится через &x&f&e&c&2&2&3" + time :
-                "&8 | &f Следующий ивент появится через &x&f&e&c&2&2&3" + time;
-
-        Colorize.sendMessage(sender, message);
+        }
+        eventManager.handleEventAnnouncements();
     }
 
     private void showHelp(CommandSender sender) {
@@ -113,31 +112,6 @@ public class EventCommand implements CommandExecutor {
         sender.sendMessage("/raidevents goldrush spawn");
         sender.sendMessage("/raidevents customitem add");
         sender.sendMessage("/raidevents customitem remove");
-    }
-
-    private void startAirDrop() {
-        AirDrop airDrop = this.eventManager.startAirDrop(false);
-        airDrop.start();
-    }
-
-    private void startWanderer() {
-        Wanderer wanderer = this.eventManager.startWanderer(false);
-        wanderer.start();
-    }
-
-    private void startMine() {
-        Mine mine = this.eventManager.startMine(false);
-        mine.start();
-    }
-
-    private void startGoldRush() {
-        GoldRush goldRush = this.eventManager.startGoldRush(false);
-        goldRush.start();
-    }
-
-    private void startShip() {
-        Ship ship = this.eventManager.startShip(false);
-        ship.start();
     }
 
     private void handleCustomItem(String[] args, CommandSender sender) {

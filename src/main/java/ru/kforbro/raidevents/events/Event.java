@@ -12,10 +12,10 @@ public abstract class Event {
     protected final UUID uuid = UUID.randomUUID();
     protected String name;
     protected String rarity;
-
     protected abstract void stop();
 
     protected abstract void start();
+
 
     @Override
     public boolean equals(Object o) {

@@ -14,12 +14,12 @@ public final class Time {
             formattedTime.append(hours).append(" ч.");
         }
         if (minutes > 0L) {
-            if (!formattedTime.isEmpty()) {
+            if (formattedTime.length() > 0) {
                 formattedTime.append(" ");
             }
             formattedTime.append(minutes).append(" мин.");
         }
-        if (!formattedTime.isEmpty()) {
+        if (formattedTime.length() > 0) {
             formattedTime.append(" ");
         }
         formattedTime.append(seconds).append(" сек.");
