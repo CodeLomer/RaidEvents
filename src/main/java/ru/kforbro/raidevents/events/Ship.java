@@ -134,9 +134,6 @@ public class Ship extends Event {
             }
             assert world != null;
             RandomLocation.SafeLocation safeLocation = Ship.getRandomSafeLocation(world, RandomLocation.Algorithm.SQUARE, 500.0, world.getWorldBorder().getSize() / 2.0 - 50.0, 0, 0, clipboard);
-            if(safeLocation == null){
-                throw new RuntimeException("filed find safe location for event " + this.name);
-            }
             RaidEvents.getInstance().getEventManager().setCurrentShip(this);
             this.location = safeLocation.location().add(0.0, 1.0, 0.0);
             this.pasteClipboard(this.location, clipboard);

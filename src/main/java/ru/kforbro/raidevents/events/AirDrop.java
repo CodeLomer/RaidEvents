@@ -321,7 +321,7 @@ public class AirDrop extends Event {
     }*/
 
 
-    public void createDecentHologram() {
+  /*  public void createDecentHologram() {
         List<String> lines = List.of(
                 Colorize.format(this.name + " &7/ " + this.rarity),
                 Colorize.format(this.opened
@@ -341,7 +341,7 @@ public class AirDrop extends Event {
            throw new RuntimeException(e);
        }
         DHAPI.setHologramLines(this.decentHologram, lines);
-    }
+    }*/
 
 
     @Override

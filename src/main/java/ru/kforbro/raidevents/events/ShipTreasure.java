@@ -20,7 +20,6 @@ import ru.kforbro.raidevents.RaidEvents;
 import ru.kforbro.raidevents.gui.builder.item.ItemBuilder;
 import ru.kforbro.raidevents.gui.guis.Gui;
 import ru.kforbro.raidevents.utils.Colorize;
-import ru.kforbro.raidevents.utils.HologramUtils;
 import ru.kforbro.raidevents.utils.Time;
 import ru.kforbro.raidevents.utils.Utils;
 import net.kyori.adventure.text.Component;
@@ -141,7 +140,7 @@ public class ShipTreasure {
     }
 
     private void createDecentHologram() {
-        Hologram hologram = DHAPI.getHologram(this.hologramName);
+       /* Hologram hologram = DHAPI.getHologram(this.hologramName);
         List<String> lines = getHologramLines();
 
         if (hologram == null) {
@@ -151,6 +150,8 @@ public class ShipTreasure {
             hologram.getPage(0).setLine(0, lines.get(0));
             hologram.getPage(0).setLine(1, lines.get(1));
         }
+
+        */
     }
 
     private void createFancyHologram() {
@@ -197,7 +198,7 @@ public class ShipTreasure {
     }
 
     private void removeDecentHologram() {
-        DHAPI.removeHologram(this.hologramName);
+        //DHAPI.removeHologram(this.hologramName);
     }
 
     private void removeFancyHologram() {

@@ -1,8 +1,6 @@
 package ru.kforbro.raidevents.events;
 
 import de.exlll.configlib.Ignore;
-import eu.decentsoftware.holograms.api.DHAPI;
-import eu.decentsoftware.holograms.api.holograms.Hologram;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
@@ -13,9 +11,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
 import org.bukkit.block.data.BlockData;
 import ru.kforbro.raidevents.config.Loot;
-import ru.kforbro.raidevents.utils.HologramUtils;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -53,7 +49,7 @@ public class ShipBarrel {
 
     public void despawn() {
         this.location.getBlock().setType(Material.AIR);
-        this.removeHologram();
+        //this.removeHologram();
         Bukkit.getScheduler().cancelTask(this.taskId);
         this.taskId = -1;
         this.opened = false;
@@ -71,7 +67,7 @@ public class ShipBarrel {
     }
 
     public void createHologram(int seconds) {
-        Hologram hologram = DHAPI.getHologram(this.hologramName);
+       /* Hologram hologram = DHAPI.getHologram(this.hologramName);
         List<String> lines = List.of("Ящик пропадет", "через &x&f&e&c&2&2&3" + seconds + " сек.");
         if (hologram == null) {
             Location center = this.location.clone().add(0.5, 1.3, 0.5);
@@ -81,8 +77,9 @@ public class ShipBarrel {
             hologram.getPage(0).setLine(0, lines.get(0));
             hologram.getPage(0).setLine(1, lines.get(1));
         }
+        */
     }
-
+    /*
     public void removeHologram() {
         this.removeDecentHologram();
     }
@@ -91,7 +88,7 @@ public class ShipBarrel {
     private void removeDecentHologram() {
         DHAPI.removeHologram(this.hologramName);
     }
-
+    */
 
     public String serializeLocation(Location location) {
         int blockX = location.getBlockX();

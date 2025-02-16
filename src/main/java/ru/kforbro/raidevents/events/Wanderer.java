@@ -369,7 +369,10 @@ public class Wanderer extends Event {
     }
 
     public Clipboard getClipboard() {
-        File file = new File("plugins/FastAsyncWorldEdit/schematics/raidevents_wanderer.schem");
+        File file = new File("plugins/worldEdit/schematics/raidevents_wanderer.schem");
+        if(!file.exists() || !file.getName().endsWith(".schem")){
+            MyLogger.logError(this,"не удалось найти файл cхематики для данного ивента -> raidevents_wanderer_schem");
+        }
         ClipboardFormat format = ClipboardFormats.findByFile(file);
         if(format == null){
             throw new RuntimeException("filed load clipboard for event "+this.name);
@@ -537,7 +540,7 @@ public class Wanderer extends Event {
         this.location = safeLocation.location().add(0.0, 1.0, 0.0);
         Clipboard clipboard = this.getClipboard();
         if(clipboard == null){
-            throw new RuntimeException("Failed to load clipboard for event "+this.name);
+            return;
         }
         this.pasteClipboard(this.location, clipboard);
         this.createRegion(clipboard);
