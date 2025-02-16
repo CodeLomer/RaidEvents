@@ -137,6 +137,9 @@ public class Ship extends Event {
             RandomLocation.SafeLocation safeLocation = Ship.getRandomSafeLocation(world, RandomLocation.Algorithm.SQUARE, 500.0, world.getWorldBorder().getSize() / 2.0 - 50.0, 0, 0, clipboard);
             RaidEvents.getInstance().getEventManager().setCurrentShip(this);
             this.location = safeLocation.location().add(0.0, 1.0, 0.0);
+            int yNPC = world.getHighestBlockYAt(location);
+            Location npcLocation = this.location.clone().add(0.0, yNPC+1, 0.0);
+            npcLocation.add(npcLocation);
             this.pasteClipboard(this.location, clipboard);
             this.createRegion(clipboard);
             this.spawnNpc();

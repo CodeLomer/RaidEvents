@@ -80,6 +80,9 @@ public class Mine extends Event {
                 }
                 RaidEvents.getInstance().getEventManager().setCurrentMine(this);
                 this.location = safeLocation.location().add(0.0, 1.0, 0.0);
+                int yNPC = world.getHighestBlockYAt(location);
+                Location npcLocation = this.location.clone().add(0.0, yNPC+1, 0.0);
+                npcLocation.add(npcLocation);
                 this.pasteClipboard(this.location, clipboard);
                 this.setBlocks();
                 this.createRegion(clipboard);

@@ -554,6 +554,9 @@ public class Wanderer extends Event {
         }
         RaidEvents.getInstance().getEventManager().setCurrentWanderer(this);
         this.location = safeLocation.location().add(0.0, 1.0, 0.0);
+        int yNPC = world.getHighestBlockYAt(location);
+        Location npcLocation = this.location.clone().add(0.0, yNPC+1, 0.0);
+        npcLocations.add(npcLocation);
         Bukkit.getOnlinePlayers().forEach(player -> {
             Colorize.sendMessage(player, "&f");
             Colorize.sendMessage(player, "&9 &n┃&r " + this.name + " &fначал раздавать экспириум.");
