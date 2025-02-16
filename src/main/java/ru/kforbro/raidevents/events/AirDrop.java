@@ -23,6 +23,7 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.type.RespawnAnchor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
@@ -210,7 +211,7 @@ public class AirDrop extends Event {
         });
     }
 
-    public void announce(Player player) {
+    public void announce(CommandSender player) {
         if (this.openAt < System.currentTimeMillis()) {
             return;
         }

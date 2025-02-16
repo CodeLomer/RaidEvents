@@ -7,9 +7,6 @@ import org.bukkit.entity.Player;
 
 public final class Colorize {
     private Colorize(){}
-    public static void sendMessage(Player player, String message) {
-        player.sendMessage(format(message));
-    }
 
     public static void sendMessage(String playerName, String message) {
         Player player = getPlayer(playerName);

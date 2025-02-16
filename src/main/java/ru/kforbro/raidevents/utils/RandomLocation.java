@@ -101,9 +101,11 @@ public final class RandomLocation {
                     continue;
                 }
                 MyLogger.log(null, "Found safe location in NORMAL environment.", null);
+                MyLogger.log(null,"X: " + loc.getBlockX() + ", Y: " + loc.getBlockY() + ", Z: " + loc.getBlockZ(), null);
                 return new SafeLocation(tries, loc);
             } else if (w.getEnvironment() == World.Environment.THE_END && b.getMaterial().isSolid()) {
                 MyLogger.log(null, "Found safe location in THE_END environment.", null);
+                MyLogger.log(null,"X: " + loc.getBlockX() + ", Y: " + loc.getBlockY() + ", Z: " + loc.getBlockZ(), null);
                 return new SafeLocation(tries, loc);
             }
         }
@@ -116,6 +118,7 @@ public final class RandomLocation {
             if (isSafeNetherLocation(cs, chunkX, chunkZ, y)) {
                 loc.setY(y + 1);
                 MyLogger.log(null, "Found safe location in Nether at Y: " + (y + 1), null);
+                MyLogger.log(null,"X: " + loc.getBlockX() + ", Y: " + loc.getBlockY() + ", Z: " + loc.getBlockZ(), null);
                 return new SafeLocation(tries, loc);
             }
         }

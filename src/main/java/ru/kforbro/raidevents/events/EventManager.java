@@ -77,7 +77,7 @@ public class EventManager {
         return bukkitTask != null && !bukkitTask.isCancelled();
     }
 
-    public void handleEventAnnouncements() {
+    private void handleEventAnnouncements() {
         if (currentWanderer != null) {
             Bukkit.getOnlinePlayers().forEach(player -> currentWanderer.announce(player));
         }

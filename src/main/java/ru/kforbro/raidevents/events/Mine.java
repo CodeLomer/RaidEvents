@@ -23,7 +23,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.*;
 import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
+import org.bukkit.command.CommandSender;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.util.Vector;
@@ -115,7 +115,7 @@ public class Mine extends Event {
         });
     }
 
-    public void announce(Player player) {
+    public void announce(CommandSender player) {
         if (this.stopAt < System.currentTimeMillis()) {
             return;
         }
@@ -220,7 +220,7 @@ public class Mine extends Event {
 
     public Clipboard getClipboard() {
         Clipboard clipboard;
-        File file = new File("plugins/worldEdit/schematics/raidevents_mine.schem");
+        File file = new File("plugins/FastAsyncWorldEdit/schematics/raidevents_mine.schem");
         if(!file.exists() || !file.getName().endsWith(".schem")){
             MyLogger.logError(this,"не удалось найти файл cхематики для данного ивента -> raidevents_mine_schem");
             return null;

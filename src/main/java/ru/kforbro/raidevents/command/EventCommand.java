@@ -55,40 +55,32 @@ public class EventCommand implements CommandExecutor {
         return true;
     }
 
-    private boolean announceCurrentEvents(Player player) {
-        boolean anyEvent = false;
-
+    public void announceCurrentEvents(CommandSender sender) {
         Ship ship = this.eventManager.getCurrentShip();
         if (ship != null && ship.getStopAt() > System.currentTimeMillis()) {
-            ship.announce(player);
-            anyEvent = true;
+            ship.announce(sender);
         }
 
         Wanderer wanderer = this.eventManager.getCurrentWanderer();
         if (wanderer != null && wanderer.getSpawnChestAt() - System.currentTimeMillis() > 0L) {
-            wanderer.announce(player);
-            anyEvent = true;
+            wanderer.announce(sender);
         }
 
         Mine mine = this.eventManager.getCurrentMine();
         if (mine != null) {
-            mine.announce(player);
-            anyEvent = true;
+            mine.announce(sender);
         }
 
         GoldRush goldRush = this.eventManager.getCurrentGoldRush();
         if (goldRush != null) {
-            goldRush.announce(player);
-            anyEvent = true;
+            goldRush.announce(sender);
         }
 
         for (AirDrop airdrop : this.eventManager.getCurrentAirDrops().values()) {
             if (airdrop.getOpenAt() - System.currentTimeMillis() <= 0L) continue;
-            airdrop.announce(player);
-            anyEvent = true;
+            airdrop.announce(sender);
         }
 
-        return anyEvent;
     }
 
     private void showNextEvent(CommandSender sender) {
@@ -102,7 +94,7 @@ public class EventCommand implements CommandExecutor {
             Colorize.sendMessage(sender, message);
 
         }
-        eventManager.handleEventAnnouncements();
+        announceCurrentEvents(sender);
     }
 
     private void showHelp(CommandSender sender) {

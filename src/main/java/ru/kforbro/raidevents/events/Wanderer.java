@@ -41,6 +41,7 @@ import org.bukkit.*;
 import org.bukkit.block.Barrel;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
@@ -137,7 +138,7 @@ public class Wanderer extends Event {
     public void start() {
         CompletableFuture.runAsync(this::run);
     }
-    public void announce(Player player) {
+    public void announce(CommandSender player) {
         if (this.stopAt < System.currentTimeMillis()) {
             return;
         }
@@ -154,6 +155,7 @@ public class Wanderer extends Event {
 
     public void spawnNpc() {
         this.currentNpcLocation = this.getLocationForNpc();
+
         List<ParrotVariant> parrotVariants = List.of(
                 ParrotVariant.BLUE, ParrotVariant.GRAY, ParrotVariant.GREEN, ParrotVariant.RED_BLUE, ParrotVariant.YELLOW_BLUE
         );
@@ -369,7 +371,7 @@ public class Wanderer extends Event {
     }
 
     public Clipboard getClipboard() {
-        File file = new File("plugins/worldEdit/schematics/raidevents_wanderer.schem");
+        File file = new File("plugins/FastAsyncWorldEdit/schematics/raidevents_wanderer.schem");
         if(!file.exists() || !file.getName().endsWith(".schem")){
             MyLogger.logError(this,"не удалось найти файл cхематики для данного ивента -> raidevents_wanderer_schem");
         }
@@ -387,33 +389,47 @@ public class Wanderer extends Event {
     public void pasteClipboard(Location location, Clipboard clipboard) {
         Location adjustedLocation = location.clone().add(Wanderer.getSchematicOffset(clipboard));
         HashSet<Location> anchorBlocks = new HashSet<>();
+
         for (int x = 0; x < clipboard.getDimensions().getX(); ++x) {
             for (int y = 0; y < clipboard.getDimensions().getY(); ++y) {
                 for (int z = 0; z < clipboard.getDimensions().getZ(); ++z) {
-                    BlockVector3 adjustedClipboardLocation = BlockVector3.at(x + clipboard.getMinimumPoint().getX(), y + clipboard.getMinimumPoint().getY(), z + clipboard.getMinimumPoint().getZ());
+                    BlockVector3 adjustedClipboardLocation = BlockVector3.at(
+                            x + clipboard.getMinimumPoint().getX(),
+                            y + clipboard.getMinimumPoint().getY(),
+                            z + clipboard.getMinimumPoint().getZ()
+                    );
+
                     BlockState blockState = clipboard.getBlock(adjustedClipboardLocation);
                     Material material = BukkitAdapter.adapt(blockState.getBlockType());
                     Block worldBlock = adjustedLocation.clone().add(new Vector(x, y, z)).getBlock();
+
                     if (material == Material.BARRIER) {
                         try {
                             clipboard.setBlock(adjustedClipboardLocation, BukkitAdapter.adapt(worldBlock.getBlockData()));
                             continue;
                         } catch (WorldEditException e) {
-                            throw new RuntimeException("Failed to paste schematic",e);
+                            throw new RuntimeException("Failed to paste schematic", e);
                         }
                     }
-                    if (material != Material.RESPAWN_ANCHOR) continue;
-                    anchorBlocks.add(worldBlock.getLocation());
+                    if (material == Material.RESPAWN_ANCHOR) {
+                        anchorBlocks.add(worldBlock.getLocation());
+                    }
                 }
             }
         }
+
         anchorBlocks.forEach(anchorLocation -> this.npcLocations.add(anchorLocation.clone().add(0.5, 1.0, 0.5)));
-        try (EditSession editSession = WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(location.getWorld()))){
-            Operation operation = new ClipboardHolder(clipboard).createPaste(editSession).to(BlockVector3.at(location.getX(), location.getY(), location.getZ())).build();
+
+        try (EditSession editSession = WorldEdit.getInstance().newEditSession(BukkitAdapter.adapt(location.getWorld()))) {
+            Operation operation = new ClipboardHolder(clipboard)
+                    .createPaste(editSession)
+                    .to(BlockVector3.at(location.getX(), location.getY(), location.getZ()))
+                    .build();
+
             Operations.complete(operation);
             this.editSession = editSession;
         } catch (WorldEditException e) {
-            throw new RuntimeException("Failed to paste schematic",e);
+            throw new RuntimeException("Failed to paste schematic", e);
         }
     }
 
@@ -538,10 +554,17 @@ public class Wanderer extends Event {
         }
         RaidEvents.getInstance().getEventManager().setCurrentWanderer(this);
         this.location = safeLocation.location().add(0.0, 1.0, 0.0);
+        Bukkit.getOnlinePlayers().forEach(player -> {
+            Colorize.sendMessage(player, "&f");
+            Colorize.sendMessage(player, "&9 &n┃&r " + this.name + " &fначал раздавать экспириум.");
+            Colorize.sendMessage(player, "&9 &n┃&f Редкость: &x&f&e&c&2&2&3" + this.rarity);
+            Colorize.sendMessage(player, "&9 ┃&f Координаты: &x&f&e&c&2&2&3" + this.location.getBlockX() + ", " + this.location.getBlockY() + ", " + this.location.getBlockZ());
+            Colorize.sendMessage(player, "&f");
+            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_CELEBRATE, 1.0f, 1.0f);
+        });
         Clipboard clipboard = this.getClipboard();
-        if(clipboard == null){
-            return;
-        }
+        if(clipboard == null) return;
+
         this.pasteClipboard(this.location, clipboard);
         this.createRegion(clipboard);
         this.itemStack = this.generateItemStack();
@@ -624,15 +647,6 @@ public class Wanderer extends Event {
                 });
             }
         }.runTaskTimer(RaidEvents.getInstance(), 0L, 20L);
-        Bukkit.getOnlinePlayers().forEach(player -> {
-            Colorize.sendMessage(player, "&f");
-            Colorize.sendMessage(player, "&9 &n┃&r " + this.name + " &fначал раздавать экспириум.");
-            Colorize.sendMessage(player, "&9 &n┃&f Редкость: &x&f&e&c&2&2&3" + this.rarity);
-            Colorize.sendMessage(player, "&9 ┃&f Координаты: &x&f&e&c&2&2&3" + this.location.getBlockX() + ", " + this.location.getBlockY() + ", " + this.location.getBlockZ());
-            Colorize.sendMessage(player, "&f");
-            player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_CELEBRATE, 1.0f, 1.0f);
-        });
-        RaidEvents.getInstance().getEventManager().setCurrentWanderer(this);
 
     }
 }

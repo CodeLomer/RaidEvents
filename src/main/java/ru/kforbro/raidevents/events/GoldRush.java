@@ -4,7 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.Sound;
-import org.bukkit.entity.Player;
+import org.bukkit.command.CommandSender;
 import org.bukkit.scheduler.BukkitRunnable;
 import ru.kforbro.raidevents.RaidEvents;
 import ru.kforbro.raidevents.utils.Colorize;
@@ -52,7 +52,7 @@ public class GoldRush extends Event {
         });
     }
 
-    public void announce(Player player) {
+    public void announce(CommandSender player) {
         if (stopAt < System.currentTimeMillis()) return;
 
         Colorize.sendMessage(player, "&f");

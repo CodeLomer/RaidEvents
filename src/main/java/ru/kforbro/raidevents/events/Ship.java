@@ -35,6 +35,7 @@ import lombok.Setter;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
@@ -191,7 +192,7 @@ public class Ship extends Event {
         });
     }
 
-    public void announce(Player player) {
+    public void announce(CommandSender player) {
         if (this.stopAt < System.currentTimeMillis()) {
             return;
         }
@@ -343,7 +344,7 @@ public class Ship extends Event {
 
     public Clipboard getClipboard() {
         Clipboard clipboard;
-        File file = new File("plugins/worldEdit/schematics/" + this.schematic + ".schem");
+        File file = new File("plugins/FastAsyncWorldEdit/schematics/" + this.schematic + ".schem");
         if(!file.exists() || !file.getName().endsWith(".schem")){
             MyLogger.logError(this,"не удалось найти файл cхематики для данного ивента -> "+schematic+".schem");
             return null;
