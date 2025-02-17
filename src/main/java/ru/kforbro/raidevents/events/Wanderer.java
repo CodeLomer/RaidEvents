@@ -175,6 +175,9 @@ public class Wanderer extends Event {
         this.npc.getHologram().addLine(this.name);
         this.npc.getHologram().addLine("§fНажмите, чтобы взять");
         npcEntry.setProcessed(true);
+        NpcLocation npcLocation = new NpcLocation(currentNpcLocation);
+        npc.setLocation(npcLocation);
+        MyLogger.log(null, "NPC создан: "+npc.getLocation().getBlockX()+", "+npc.getLocation().getBlockY()+", "+npc.getLocation().getBlockZ(), org.bukkit.ChatColor.GREEN);
     }
 
 
